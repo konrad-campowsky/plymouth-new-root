@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -13,7 +14,6 @@ void timeout_handler(int signum) {
 int main() {
     int sockfd;
     struct sockaddr_un addr;
-    ssize_t bytes_written;
 
     /* Create Unix domain socket */
     sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
