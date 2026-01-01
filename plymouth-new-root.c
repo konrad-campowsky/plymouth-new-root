@@ -1,9 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <signal.h>
+
+void timeout_handler(int signum) {
+    fprintf(stderr, "timeout\n");
+    exit(124);
+}
 
 int main() {
     int sockfd;
@@ -22,16 +27,16 @@ int main() {
     addr.sun_path[0] = '\0';
     strncpy(addr.sun_path + 1, "/org/freedesktop/plymouthd", sizeof(addr.sun_path) - 2);
 
-    if (connect(sockfd, (struct sockaddr *)&addr, sizeof(sa_family_t) + 1 + strlen("/org/freedesktop/plymouthd")) == -1) {
+    signal(SIGALRM, timeout_handler);
+    alarm(3);
+
+    if (connect(sockfd, (struct sockaddr *)&addr, sizeof(sa_family_t) + 27) == -1) {
         perror("connect");
         close(sockfd);
         return 1;
     }
 
-    char message[] = "R\x02\t/sysroot";
-    bytes_written = write(sockfd, message, 12);
-
-    if (write(sockfd, message, 12) < 0) {
+    if (write(sockfd, "R\x02\t/sysroot", 12) < 0) {
         perror("write");
         close(sockfd);
         return 1;
