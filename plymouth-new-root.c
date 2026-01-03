@@ -14,8 +14,8 @@ void timeout_handler(int signum) {
 int main() {
     int sockfd;
     struct sockaddr_un addr;
+    char message[] = "R\x02\t/sysroot";
 
-    /* Create Unix domain socket */
     sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (sockfd == -1) {
         perror("socket");
@@ -36,8 +36,14 @@ int main() {
         return 1;
     }
 
-    if (write(sockfd, "R\x02\t/sysroot", 12) < 0) {
+    if (write(sockfd, message, sizeof(message)) < 0) {
         perror("write");
+        close(sockfd);
+        return 1;
+    }
+
+    if (read(sockfd, message, sizeof(message)) < 0) {
+        perror("read");
         close(sockfd);
         return 1;
     }
@@ -45,3 +51,4 @@ int main() {
     close(sockfd);
     return 0;
 }
+
